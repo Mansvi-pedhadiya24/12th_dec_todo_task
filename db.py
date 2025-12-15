@@ -7,7 +7,8 @@ DATABASE_PASSWORD = ""
 DATABASE_HOST = "localhost"
 DATABASE_NAME = "to_do"
 
-DATABASE_URL = "mysql+pymysql://root:@localhost/library"
+DATABASE_URL = "mysql+pymysql://root:@localhost/to_do"
+
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

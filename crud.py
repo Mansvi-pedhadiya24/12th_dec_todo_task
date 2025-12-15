@@ -1,7 +1,9 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from models import Todo
 from schema import TodoCreate
 from datetime import datetime
+import math
 
 def create_todo(db: Session, todo: TodoCreate):
     db_todo = Todo(
@@ -13,20 +15,31 @@ def create_todo(db: Session, todo: TodoCreate):
     db.refresh(db_todo)
     return db_todo
 
+#Pegination + Search
+def get_todos_with_search(db: Session, page: int, limit: int, search: str | None):
+    query = db.query(Todo).filter(Todo.deleted_at == None)
 
-# def get_all_todos(db):
-#     todos = db.query(Todo).filter(Todo.deleted_at == None).all()  
-#     return todos
+    if search:
+        query = query.filter(
+            or_(
+                Todo.name_todo.ilike(f"%{search}%"),
+            )
+        )
 
-def get_all_todos(db:Session,page:int = 1 , limit:int = 10):
-    offset = (page-1)*limit
+    total = query.count()
+    total_pages = math.ceil(total / limit)
 
-    return(
-        db.query(Todo).filter(Todo.deleted_at == None).offset(offset).limit(limit).all()
-    )
+    todos = query.offset((page - 1) * limit).limit(limit).all()
 
+    return todos, total_pages
 
+    
+# def get_all_todos(db:Session,page:int = 1 , limit:int = 10):
+#     offset = (page-1)*limit
 
+#     return(
+#         db.query(Todo).filter(Todo.deleted_at == None).offset(offset).limit(limit).all()
+#     )
 
 
 def get_todo(db: Session, todo_id: int):
@@ -52,5 +65,5 @@ def soft_delete_todo(db:Session,todo_id:int):
 
 #Search
 
-def search_todo(db: Session, query: str):
-    return db.query(Todo).filter(Todo.name_todo.ilike(f"%{query}%"),Todo.deleted_at==None).all()
+# def search_todo(db: Session, query: str):
+#     return db.query(Todo).filter(Todo.name_todo.ilike(f"%{query}%"),Todo.deleted_at==None).all()

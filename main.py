@@ -1,12 +1,14 @@
 from fastapi import FastAPI, Depends, HTTPException,Query
 from sqlalchemy.orm import Session
-from db import SessionLocal, engine
+from db import SessionLocal, engine 
 from models import Base
-import crud 
+from datetime import datetime
+import crud , math
 from crud import soft_delete_todo
-from schema import TodoCreate, TodoResponse, TodoUpdate
+from schema import TodoCreate, TodoResponse, TodoUpdate , TodoListResponse
 
-Base.metadata.create_all(bind=engine)
+
+# Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="ToDo project")
 
@@ -35,10 +37,25 @@ def create(todo: TodoCreate, db: Session = Depends(get_db)):
 
 
 
-# READ ALL with pagination
-@app.get("/todo/",response_model=list[TodoResponse])
-def read_all(page : int=Query(1,ge=1),limit : int=Query(10,ge=1,le=100),db:Session=Depends(get_db)):
-    return crud.get_all_todos(db,page,limit)
+#read and search with pegination
+@app.get("/todo/", response_model=TodoListResponse)
+def get_todo_with_search(
+    page: int = 1,
+    limit: int = 5,
+    search: str | None = None,
+    db: Session = Depends(get_db)
+):
+    todos, total_pages = crud.get_todos_with_search(db, page, limit, search)
+
+    return {
+        "status": True,
+        "message": "Todo list fetched successfully",
+        "total_pages": total_pages,
+        "current_page": page,
+        "search": search,
+        "data": todos
+    }
+
 
 
 # READ ONE
@@ -84,9 +101,9 @@ def update_todo(todo_id: int, updated_data: TodoUpdate, db: Session = Depends(ge
 
     return todo
 
-#Search
-@app.get("/todo-list/search", response_model=list[TodoResponse])
-def search_todo(query: str, db: Session = Depends(get_db)):
-    return crud.search_todo(db, query)
+# #Search
+# @app.get("/todo-list/search", response_model=list[TodoResponse])
+# def search_todo(query: str, db: Session = Depends(get_db)):
+#     return crud.search_todo(db, query)
 
  

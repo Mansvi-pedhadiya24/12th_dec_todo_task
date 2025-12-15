@@ -8,3 +8,6 @@ class Todo(Base):
     name_todo = Column(String(50))
     status=Column(Integer,default=1)
     deleted_at=Column(DateTime,nullable=True)
+    created_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, nullable=True)
+
