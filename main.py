@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException,Query
 from sqlalchemy.orm import Session
 from db import SessionLocal, engine
 from models import Base
@@ -29,9 +29,16 @@ def create(todo: TodoCreate, db: Session = Depends(get_db)):
     return crud.create_todo(db, todo)
 
 # READ ALL
-@app.get("/todo/", response_model=list[TodoResponse])
-def read_all(db: Session = Depends(get_db)):
-    return crud.get_all_todos(db)
+# @app.get("/todo/", response_model=list[TodoResponse])
+# def read_all(db: Session = Depends(get_db)):
+#     return crud.get_all_todos(db)
+
+
+
+# READ ALL with pagination
+@app.get("/todo/",response_model=list[TodoResponse])
+def read_all(page : int=Query(1,ge=1),limit : int=Query(10,ge=1,le=100),db:Session=Depends(get_db)):
+    return crud.get_all_todos(db,page,limit)
 
 
 # READ ONE

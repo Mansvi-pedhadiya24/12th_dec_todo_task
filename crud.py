@@ -14,9 +14,19 @@ def create_todo(db: Session, todo: TodoCreate):
     return db_todo
 
 
-def get_all_todos(db):
-    todos = db.query(Todo).filter(Todo.deleted_at == None).all()  
-    return todos
+# def get_all_todos(db):
+#     todos = db.query(Todo).filter(Todo.deleted_at == None).all()  
+#     return todos
+
+def get_all_todos(db:Session,page:int = 1 , limit:int = 10):
+    offset = (page-1)*limit
+
+    return(
+        db.query(Todo).filter(Todo.deleted_at == None).offset(offset).limit(limit).all()
+    )
+
+
+
 
 
 def get_todo(db: Session, todo_id: int):
@@ -43,6 +53,4 @@ def soft_delete_todo(db:Session,todo_id:int):
 #Search
 
 def search_todo(db: Session, query: str):
-    return db.query(Todo).filter(Todo.name_todo.ilike(f"%{query}%"),Todo.deleted_at==Nonepython -m venv venv
-).all()
-
+    return db.query(Todo).filter(Todo.name_todo.ilike(f"%{query}%"),Todo.deleted_at==None).all()
